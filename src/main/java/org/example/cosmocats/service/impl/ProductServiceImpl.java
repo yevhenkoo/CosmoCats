@@ -1,6 +1,7 @@
 package org.example.cosmocats.service.impl;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.example.cosmocats.client.SupplierClient;
 import org.example.cosmocats.domain.Category;
 import org.example.cosmocats.domain.Product;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -58,6 +60,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailsEntry createProduct(ProductDetailsDto productDto) {
+        log.info("Creating product: {}", productDto);
+
         Product product = productMapper.toProductEntity(productDto);
         product.setId(sequence.incrementAndGet());
         Category mockCategory = new Category();
@@ -65,11 +69,14 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(mockCategory);
 
         productStore.put(product.getId(), product);
+        log.debug("Product saved in store with id: {}", product.getId());
+
         return productMapper.toProductDetailsEntry(product);
     }
 
     @Override
     public List<ProductDetailsEntry> getAllProducts() {
+        log.info("Fetching all products. Total count: {}", productStore.size());
         return productStore.values().stream()
                 .map(productMapper::toProductDetailsEntry)
                 .toList();
@@ -77,28 +84,35 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailsEntry getProductById(Long id) {
+        log.info("Fetching product by id: {}", id);
+
         Product product = productStore.get(id);
         if (product == null) {
+            log.warn("Product with id {} not found", id);
             throw new ProductNotFoundException("Product with id " + id + " not found");
         }
 
         ProductDetailsEntry productDto = productMapper.toProductDetailsEntry(product);
-
         SupplierInfoDto supplierInfo = supplierClient.getSupplierInfo(product.getSku());
 
         if (supplierInfo != null) {
+            log.debug("Adding supplier info for product id {}: {}", id, supplierInfo);
             productDto.setSupplierName(supplierInfo.getSupplierName());
             productDto.setSupplierCountry(supplierInfo.getCountry());
+        } else {
+            log.debug("No supplier info found for product sku {}", product.getSku());
         }
-
 
         return productDto;
     }
 
     @Override
     public ProductDetailsEntry updateProduct(Long id, ProductDetailsDto productDto) {
+        log.info("Updating product with id: {}", id);
+
         Product existingProduct = productStore.get(id);
         if (existingProduct == null) {
+            log.warn("Product with id {} not found for update", id);
             throw new ProductNotFoundException("Product with id " + id + " not found");
         }
 
@@ -112,14 +126,21 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setCategory(mockCategory);
 
         productStore.put(id, existingProduct);
+        log.debug("Product with id {} updated successfully", id);
+
         return productMapper.toProductDetailsEntry(existingProduct);
     }
 
     @Override
     public void deleteProduct(Long id) {
+        log.info("Deleting product with id: {}", id);
+
         if (!productStore.containsKey(id)) {
+            log.warn("Product with id {} not found for deletion", id);
             throw new ProductNotFoundException("Product with id " + id + " not found");
         }
+
         productStore.remove(id);
+        log.debug("Product with id {} deleted successfully", id);
     }
 }

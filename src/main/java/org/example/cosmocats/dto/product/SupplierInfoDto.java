@@ -1,10 +1,10 @@
 package org.example.cosmocats.dto.product;
 
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 public class SupplierInfoDto {
-    private String supplierName;
-    private String country;
-    private int deliveryTimeDays;
+    String supplierName;
+    String country;
+    int deliveryTimeDays;
 }
