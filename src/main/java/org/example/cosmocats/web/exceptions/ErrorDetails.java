@@ -1,4 +1,4 @@
-package org.example.cosmocats.exceptions;
+package org.example.cosmocats.web.exceptions;
 
 public record ErrorDetails(int status,
                           String error,

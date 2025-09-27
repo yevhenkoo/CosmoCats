@@ -1,4 +1,4 @@
-package org.example.cosmocats.exceptions;
+package org.example.cosmocats.web.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

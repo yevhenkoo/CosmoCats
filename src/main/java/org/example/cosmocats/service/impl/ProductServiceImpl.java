@@ -7,7 +7,7 @@ import org.example.cosmocats.domain.Product;
 import org.example.cosmocats.dto.product.ProductDetailsDto;
 import org.example.cosmocats.dto.product.ProductDetailsEntry;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
-import org.example.cosmocats.exceptions.ProductNotFoundException;
+import org.example.cosmocats.web.exceptions.ProductNotFoundException;
 import org.example.cosmocats.service.ProductService;
 import org.example.cosmocats.service.mapper.ProductMapper;
 import org.springframework.stereotype.Service;
