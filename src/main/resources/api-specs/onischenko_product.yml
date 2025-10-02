@@ -1,0 +1,165 @@
+openapi: 3.0.3
+info:
+  title: Product API
+  description: API for managing product data
+  version: 1.0.0
+
+paths:
+  /api/products:
+    get:
+      summary: Get all products
+      tags:
+        - Products
+      responses:
+        '200':
+          description: A list of all products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailsListDto'
+    post:
+      summary: Create a new product
+      tags:
+        - Products
+      requestBody:
+        description: Data for the new product
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDetailsDto'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailsEntry'
+        '400':
+          description: Invalid input provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/products/{id}:
+    get:
+      summary: Get product by ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The unique identifier of the product to retrieve
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailsEntry'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ProductDetailsDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+          description: Name of the product
+        description:
+          type: string
+          description: A detailed description of the product
+        price:
+          type: number
+          format: float
+          description: Price of the product
+        sku:
+          type: string
+          pattern: "^[A-Z0-9-]{3,20}$"
+          description: Stock Keeping Unit (SKU) for the product
+        category:
+          type: string
+          description: The category the product belongs to
+        stockQuantity:
+          type: integer
+          description: The number of items available in stock
+          minimum: 0
+
+    ProductDetailsListDto:
+      type: object
+      properties:
+        productDetailsEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDetailsEntry'
+
+    ProductDetailsEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the product
+        name:
+          type: string
+          description: Name of the product
+        price:
+          type: number
+          format: float
+          description: Price of the product
+        sku:
+          type: string
+          description: Stock Keeping Unit (SKU) for the product
+        category:
+          type: string
+          description: The category the product belongs to
+        stockQuantity:
+          type: integer
+          description: The number of items available in stock
+
+    ValidationError:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "400"
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParamsViolationDetails'
+
+    ErrorResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          description: A URI reference that identifies the problem type
+        title:
+          type: string
+          description: A short, human-readable summary of the problem
+        status:
+          type: integer
+          description: The HTTP status code
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem
+
+    ParamsViolationDetails:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: The field where the validation error occurred
+        reason:
+          type: string
+          description: The reason for the validation error
