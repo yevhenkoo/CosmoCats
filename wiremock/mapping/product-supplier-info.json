@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/suppliers/info/.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "supplierName": "Cosmic Goods Inc.",
+      "country": "Jupiter",
+      "deliveryTimeDays": 5
+    }
+  }
+}
