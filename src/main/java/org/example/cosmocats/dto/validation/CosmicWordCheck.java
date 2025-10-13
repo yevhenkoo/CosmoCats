@@ -8,7 +8,9 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CosmicWordCheck {
-    String message() default "name must contain a cosmic word (e.g., star, galaxy, comet)";
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {};
+  String message() default "name must contain a cosmic word (e.g., star, galaxy, comet)";
+
+  Class<?>[] groups() default {};
+
+  Class<? extends Payload>[] payload() default {};
 }

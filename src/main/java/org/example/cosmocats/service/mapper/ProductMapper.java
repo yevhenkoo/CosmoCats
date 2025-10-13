@@ -10,10 +10,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(source = "category.name", target = "category")
-    ProductDetailsEntry toProductDetailsEntry(Product product);
+  @Mapping(source = "category.name", target = "category")
+  ProductDetailsEntry toProductDetailsEntry(Product product);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true)
-    Product toProductEntity(ProductDetailsDto dto);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "category", ignore = true)
+  Product toProductEntity(ProductDetailsDto dto);
 }

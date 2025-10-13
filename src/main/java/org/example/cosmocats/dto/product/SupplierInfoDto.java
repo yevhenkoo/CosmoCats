@@ -4,7 +4,7 @@ import lombok.Value;
 
 @Value
 public class SupplierInfoDto {
-    String supplierName;
-    String country;
-    int deliveryTimeDays;
+  String supplierName;
+  String country;
+  int deliveryTimeDays;
 }
