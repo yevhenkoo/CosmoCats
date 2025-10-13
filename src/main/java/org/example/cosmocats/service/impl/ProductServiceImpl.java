@@ -133,14 +133,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
-        log.info("Deleting product with id: {}", id);
-
-        if (!productStore.containsKey(id)) {
-            log.warn("Product with id {} not found for deletion", id);
-            throw new ProductNotFoundException("Product with id " + id + " not found");
+        log.info("Attempting to delete product with id: {}", id);
+        if (productStore.remove(id) != null) {
+            log.info("Product with id {} was successfully deleted", id);
+        }
+        else {
+            log.info("Product with id {} not found. No action taken.", id);
         }
 
-        productStore.remove(id);
-        log.debug("Product with id {} deleted successfully", id);
     }
 }
