@@ -34,7 +34,6 @@ public class ProductServiceImpl implements ProductService {
 
   @PostConstruct
   public void init() {
-    // Додамо декілька продуктів для тестування
     Category electronics = new Category();
     electronics.setId(1L);
     electronics.setName("Electronics");
