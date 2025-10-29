@@ -113,7 +113,7 @@ class ProductServiceImplTest {
     @Test
     @DisplayName("updateProduct: Need to update and return the product")
     void updateProduct_shouldReturnUpdatedProduct() {
-        // Arrange
+
         Long id = 1L;
         ProductDetailsDto updateDto = ProductDetailsDto.builder()
                 .name("Updated Name")

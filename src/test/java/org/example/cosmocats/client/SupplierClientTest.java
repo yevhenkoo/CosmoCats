@@ -41,7 +41,6 @@ class SupplierClientTest {
     @Test
     @DisplayName("getSupplierInfo (Positive): Should return DTO on 200 OK response")
     void getSupplierInfo_shouldReturnInfo_whenApiCallIsSuccessful() throws Exception {
-        // Arrange
         String sku = "SKU-SUCCESS";
         SupplierInfoDto supplierInfo = new SupplierInfoDto("Galactic Supplies", "Andromeda", 3);
         String jsonBody = objectMapper.writeValueAsString(supplierInfo);
@@ -52,22 +51,18 @@ class SupplierClientTest {
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(jsonBody)));
 
-        // Act
         SupplierInfoDto result = supplierClient.getSupplierInfo(sku);
 
-        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getSupplierName()).isEqualTo("Galactic Supplies");
         assertThat(result.getDeliveryTimeDays()).isEqualTo(3);
 
-        // Перевіряємо, що клієнт дійсно викликав потрібний URL
         wireMockServer.verify(getRequestedFor(urlEqualTo("/suppliers/info/" + sku)));
     }
 
     @Test
     @DisplayName("getSupplierInfo (Negative): Should return null if the API returns 404")
     void getSupplierInfo_shouldReturnNull_whenApiReturns404() {
-        // Arrange
         String sku = "SKU-NOT-FOUND";
         wireMockServer.stubFor(get(urlEqualTo("/suppliers/info/" + sku))
                 .willReturn(aResponse().withStatus(404)));
