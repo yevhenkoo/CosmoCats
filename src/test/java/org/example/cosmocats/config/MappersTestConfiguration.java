@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class MappersTestConfiguration {
 
-    @Bean
-    public ProductMapper productMapper() {
-        return Mappers.getMapper(ProductMapper.class);
-    }
+  @Bean
+  public ProductMapper productMapper() {
+    return Mappers.getMapper(ProductMapper.class);
+  }
 }

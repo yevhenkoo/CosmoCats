@@ -22,30 +22,29 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 @Import({AbstractIt.TestRestClientConfig.class, AbstractIt.DisableDbAutoConfig.class})
 public abstract class AbstractIt {
 
-    @RegisterExtension
-    protected static WireMockExtension wireMockServer = WireMockExtension.newInstance()
-            .options(wireMockConfig().dynamicPort())
-            .configureStaticDsl(true)
-            .build();
+  @RegisterExtension
+  protected static WireMockExtension wireMockServer =
+      WireMockExtension.newInstance()
+          .options(wireMockConfig().dynamicPort())
+          .configureStaticDsl(true)
+          .build();
 
-    @TestConfiguration
-    static class TestRestClientConfig {
+  @TestConfiguration
+  static class TestRestClientConfig {
 
-        @Bean
-        @Primary
-        public RestClient testSupplierRestClient() {
-            return RestClient.builder()
-                    .baseUrl(wireMockServer.baseUrl())
-                    .build();
-        }
+    @Bean
+    @Primary
+    public RestClient testSupplierRestClient() {
+      return RestClient.builder().baseUrl(wireMockServer.baseUrl()).build();
     }
+  }
 
-    @TestConfiguration
-    @EnableAutoConfiguration(exclude = {
-            DataSourceAutoConfiguration.class,
-            HibernateJpaAutoConfiguration.class,
-            LiquibaseAutoConfiguration.class
-    })
-    static class DisableDbAutoConfig {
-    }
+  @TestConfiguration
+  @EnableAutoConfiguration(
+      exclude = {
+        DataSourceAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class,
+        LiquibaseAutoConfiguration.class
+      })
+  static class DisableDbAutoConfig {}
 }
