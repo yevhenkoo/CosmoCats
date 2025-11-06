@@ -4,6 +4,7 @@ info:
   description: API for managing product data
   version: 1.0.0
 
+
 paths:
   /api/v1/products:
     get:
@@ -41,6 +42,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+
 
   /api/v1/products/{id}:
     get:
