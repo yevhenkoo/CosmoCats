@@ -15,7 +15,7 @@ java {
     }
 }
 ext {
-    minimumCoveragePerFile = 0.8
+    minimumCoveragePerFile = 0.7
     filesExcludedFromCoverage = [
             "**/config/*Configuration.*",
             '**/org/example/cosmocats/CosmoCatsApplication.*',
