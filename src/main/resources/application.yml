@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: CosmoCats
+
+supplier:
+  service:
+    url: http://localhost:8089
