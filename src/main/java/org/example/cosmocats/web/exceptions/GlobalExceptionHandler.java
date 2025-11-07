@@ -1,6 +1,9 @@
 package org.example.cosmocats.web.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.cosmocats.featuretoggle.exception.FeatureToggleNotEnabledException; // <--
+                                                                                       // Додайте
+                                                                                       // цей імпорт
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -28,6 +31,20 @@ public class GlobalExceptionHandler {
     ErrorDetails errorDetails =
         new ErrorDetails(
             HttpStatus.BAD_REQUEST.value(), "Bad Request", errorMessage, request.getRequestURI());
+
+    return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(FeatureToggleNotEnabledException.class)
+  public ResponseEntity<ErrorDetails> handleFeatureToggleNotEnabled(
+      FeatureToggleNotEnabledException ex, HttpServletRequest request) {
+
+    ErrorDetails errorDetails =
+        new ErrorDetails(
+            HttpStatus.BAD_REQUEST.value(),
+            "Bad Request",
+            ex.getMessage(),
+            request.getRequestURI());
 
     return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
   }

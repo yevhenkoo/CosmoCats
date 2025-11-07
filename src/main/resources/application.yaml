@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: CosmoCats
-
-feature:
-  toggles:
-    cosmoCats: true
-    kittyProducts: false

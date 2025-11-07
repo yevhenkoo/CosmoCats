@@ -10,7 +10,7 @@ public class RestClientConfig {
 
   @Bean
   public RestClient supplierRestClient(
-      @Value("${supplier.service.url}") String supplierServiceUrl) {
+      @Value("${application.payment-service.base-path}") String supplierServiceUrl) {
 
     return RestClient.builder().baseUrl(supplierServiceUrl).build();
   }

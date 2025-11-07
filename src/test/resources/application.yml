@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: CosmoCats
+
+application:
+  feature:
+    toggles:
+      cosmo-cats: false
+      kitty-products: false
+
+tests:
+  unit-tests:
+    enabled: true

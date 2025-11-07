@@ -21,7 +21,7 @@ public abstract class AbstractIT {
 
   @DynamicPropertySource
   static void dynamicProperties(DynamicPropertyRegistry registry) {
-    registry.add("supplier.service.url", wireMockServer::baseUrl);
+    registry.add("application.payment-service.base-path", wireMockServer::baseUrl);
     WireMock.configureFor(wireMockServer.getPort());
   }
 }
