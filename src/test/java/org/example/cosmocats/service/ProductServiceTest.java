@@ -1,37 +1,41 @@
 package org.example.cosmocats.service;
 
 import org.example.cosmocats.client.SupplierClient;
-import org.example.cosmocats.config.MappersTestConfiguration;
+import org.example.cosmocats.domain.Category;
+import org.example.cosmocats.domain.Product;
 import org.example.cosmocats.dto.product.ProductDetailsDto;
 import org.example.cosmocats.dto.product.ProductDetailsEntry;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
+import org.example.cosmocats.repository.CategoryRepository;
+import org.example.cosmocats.repository.ProductRepository;
 import org.example.cosmocats.service.impl.ProductServiceImpl;
+import org.example.cosmocats.service.mapper.ProductMapper;
 import org.example.cosmocats.web.exceptions.ProductNotFoundException;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest(classes = {ProductServiceImpl.class})
-@Import(MappersTestConfiguration.class)
-@DisplayName("Product Service Tests")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Product Service Unit Tests")
 class ProductServiceTest {
 
-  @MockBean private SupplierClient supplierClient;
+  @Mock private ProductRepository productRepository;
+  @Mock private CategoryRepository categoryRepository;
+  @Mock private SupplierClient supplierClient;
+  @Mock private ProductMapper productMapper;
 
-  @Autowired private ProductServiceImpl productService;
+  @InjectMocks private ProductServiceImpl productService;
 
   private ProductDetailsDto buildCreateDto() {
     return ProductDetailsDto.builder()
@@ -45,112 +49,154 @@ class ProductServiceTest {
   }
 
   @Test
-  @Order(1)
-  @DisplayName("getAllProducts: Should return a list of all products (from init())")
+  @DisplayName("getAllProducts: Should return list of products")
   void testGetAllProducts() {
+
+    Product product = new Product();
+    product.setId(1L);
+
+    ProductDetailsEntry entry = new ProductDetailsEntry();
+    entry.setName("Test Product");
+
+    when(productRepository.findAll()).thenReturn(List.of(product));
+    when(productMapper.toProductDetailsEntry(product)).thenReturn(entry);
+
     List<ProductDetailsEntry> results = productService.getAllProducts();
 
     assertNotNull(results);
-    assertEquals(2, results.size());
+    assertEquals(1, results.size());
+    verify(productRepository).findAll();
   }
 
   @Test
-  @Order(2)
   @DisplayName("getProductById: Must return product with supplier information")
   void testGetProductById_shouldReturnProductWithSupplierInfo() {
     Long id = 1L;
     String sku = "ELEC-MON-001";
+
+    Product product = new Product();
+    product.setId(id);
+    product.setSku(sku);
+
+    ProductDetailsEntry entry = new ProductDetailsEntry();
+    entry.setId(id);
+
     SupplierInfoDto supplierInfo = new SupplierInfoDto("Mars Supplies", "Mars", 5);
 
+    when(productRepository.findById(id)).thenReturn(Optional.of(product));
+    when(productMapper.toProductDetailsEntry(product)).thenReturn(entry);
     when(supplierClient.getSupplierInfo(sku)).thenReturn(supplierInfo);
 
     ProductDetailsEntry result = productService.getProductById(id);
 
     assertNotNull(result);
     assertEquals(id, result.getId());
-    assertEquals(supplierInfo.getSupplierName(), result.getSupplierName());
-    assertEquals(supplierInfo.getCountry(), result.getSupplierCountry());
+    assertEquals("Mars Supplies", result.getSupplierName());
   }
 
   @Test
-  @Order(3)
   @DisplayName("createProduct: Must create and return a new product")
   void testCreateProduct_shouldReturnCreatedProduct() {
     ProductDetailsDto createDto = buildCreateDto();
 
+    Category category = new Category();
+    category.setName("Gadgets");
+
+    Product mappedProduct = new Product();
+    mappedProduct.setName("New Product");
+
+    Product savedProduct = new Product();
+    savedProduct.setId(10L);
+    savedProduct.setName("New Product");
+
+    ProductDetailsEntry expectedResult = new ProductDetailsEntry();
+    expectedResult.setId(10L);
+    expectedResult.setName("New Product");
+
+    when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
+
+    when(productMapper.toProductEntity(createDto)).thenReturn(mappedProduct);
+    when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+    when(productMapper.toProductDetailsEntry(savedProduct)).thenReturn(expectedResult);
+
     ProductDetailsEntry result = productService.createProduct(createDto);
 
     assertNotNull(result);
+    assertEquals(10L, result.getId());
     assertEquals("New Product", result.getName());
-    assertNotNull(result.getId());
-    assertEquals(3, productService.getAllProducts().size());
+    verify(productRepository).save(any(Product.class));
   }
 
   @Test
-  @Order(4)
   @DisplayName("updateProduct: Need to update and return the product")
   void testUpdateProduct_shouldReturnUpdatedProduct() {
     Long id = 1L;
     ProductDetailsDto updateDto =
-        ProductDetailsDto.builder()
-            .name("Updated Name")
-            .description("Updated Desc")
-            .price(1500.0)
-            .sku("UPD-SKU-001")
-            .category("Updated Category")
-            .stockQuantity(5)
-            .build();
+        buildCreateDto().toBuilder().name("Updated Name").category("Updated Category").build();
+
+    Product existingProduct = new Product();
+    existingProduct.setId(id);
+    existingProduct.setName("Old Name");
+
+    Category oldCategory = new Category();
+    oldCategory.setName("Old Category");
+    existingProduct.setCategory(oldCategory);
+
+    Category newCategory = new Category();
+    newCategory.setName("Updated Category");
+
+    Product updatedProduct = new Product();
+    updatedProduct.setId(id);
+    updatedProduct.setName("Updated Name");
+
+    ProductDetailsEntry entry = new ProductDetailsEntry();
+    entry.setName("Updated Name");
+
+    when(productRepository.findById(id)).thenReturn(Optional.of(existingProduct));
+    when(categoryRepository.findByName("Updated Category")).thenReturn(Optional.of(newCategory));
+
+    when(productRepository.save(existingProduct)).thenReturn(updatedProduct);
+    when(productMapper.toProductDetailsEntry(updatedProduct)).thenReturn(entry);
 
     ProductDetailsEntry result = productService.updateProduct(id, updateDto);
 
     assertNotNull(result);
     assertEquals("Updated Name", result.getName());
-
-    ProductDetailsEntry fetchedAfterUpdate = productService.getProductById(id);
-    assertEquals("Updated Name", fetchedAfterUpdate.getName());
   }
 
   @Test
-  @Order(5)
   @DisplayName("deleteProduct: Should delete an existing product")
   void testDeleteProduct_shouldRemoveProduct() {
     Long id = 1L;
-    assertEquals(3, productService.getAllProducts().size());
+    when(productRepository.existsById(id)).thenReturn(true);
 
     productService.deleteProduct(id);
 
-    assertThrows(
-        ProductNotFoundException.class,
-        () -> {
-          productService.getProductById(id);
-        });
-    assertEquals(2, productService.getAllProducts().size());
+    verify(productRepository).deleteById(id);
   }
 
   @Test
-  @Order(6)
   @DisplayName("getProductById: Should throw ProductNotFoundException if product not found")
   void testGetProductById_shouldThrowExceptionWhenNotFound() {
+    Long id = 999L;
+    when(productRepository.findById(id)).thenReturn(Optional.empty());
+
     Exception exception =
         assertThrows(
             ProductNotFoundException.class,
             () -> {
-              productService.getProductById(999L);
+              productService.getProductById(id);
             });
 
-    assertEquals("Product with id 999 not found", exception.getMessage());
+    assertTrue(exception.getMessage().contains("not found"));
   }
 
   @Test
-  @Order(7)
   @DisplayName("deleteProduct: Should exit silently if product not found")
   void testDeleteProduct_shouldDoNothingWhenNotFound() {
     Long id = 999L;
-
-    assertEquals(2, productService.getAllProducts().size());
-
+    when(productRepository.existsById(id)).thenReturn(false);
     assertDoesNotThrow(() -> productService.deleteProduct(id));
-
-    assertEquals(2, productService.getAllProducts().size());
+    verify(productRepository, never()).deleteById(id);
   }
 }

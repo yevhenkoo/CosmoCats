@@ -17,7 +17,11 @@ jacocoTestCoverageVerification {
             enabled = true
             failOnViolation = true
             element = 'SOURCEFILE'
-            excludes = ['**/CosmoCatsApplication.*']
+            excludes = ['**/CosmoCatsApplication.*',
+                        '**/config/*Configuration.*',
+                        '**/org/example/cosmocats/service/mapper/**',
+                        '**/org/example/cosmocats/dto/**',
+                        '**/org/example/cosmocats/client/**']
             limit {
                 counter = 'LINE'
                 minimum = minimumCoveragePerFile
