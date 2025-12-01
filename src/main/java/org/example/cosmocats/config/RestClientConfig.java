@@ -1,5 +1,6 @@
 package org.example.cosmocats.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -8,7 +9,9 @@ import org.springframework.web.client.RestClient;
 public class RestClientConfig {
 
   @Bean
-  public RestClient supplierRestClient() {
-    return RestClient.builder().baseUrl("http://localhost:8089").build();
+  public RestClient supplierRestClient(
+      @Value("${application.payment-service.base-path}") String supplierServiceUrl) {
+
+    return RestClient.builder().baseUrl(supplierServiceUrl).build();
   }
 }

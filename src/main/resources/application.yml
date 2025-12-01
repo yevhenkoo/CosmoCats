@@ -1,0 +1,28 @@
+spring:
+  profile:
+    active: local
+  application:
+    name: CosmoCats
+
+application:
+  supplier:
+    service:
+      url: http://localhost:8089
+  rating-service:
+    base-path: http://localhost:8089
+    ratings: ${application.rating-service.base-path}/rating-service/v1/ratings
+  feature:
+    toggles:
+      cosmo-kitty: true
+      cat-products: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+application:
+  feature:
+    toggles:
+      cosmo-kitty: true
+      cat-products: false
