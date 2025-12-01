@@ -83,7 +83,7 @@ class ProductControllerIT extends AbstractIT {
                 .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status", is(400)))
-        .andExpect(jsonPath("$.message", containsString("name")));
+        .andExpect(jsonPath("$.errors[*]", hasItem(containsString("name"))));
   }
 
   @Test
@@ -97,7 +97,9 @@ class ProductControllerIT extends AbstractIT {
             post("/api/v1/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status", is(400)))
+        .andExpect(jsonPath("$.errors[*]", hasItem(containsString("price"))));
   }
 
   @Test
@@ -111,14 +113,15 @@ class ProductControllerIT extends AbstractIT {
             post("/api/v1/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status", is(400)))
+        .andExpect(jsonPath("$.errors[*]", hasItem(containsString("sku"))));
   }
 
   @Test
   @DisplayName("GET /products/{id} (Positive): Should return 200 OK and product with WireMock data")
   @SneakyThrows
   void getProductById_shouldReturn200_whenFound_withSupplierInfo() {
-
     Category category = new Category();
     category.setName("Electronics");
     categoryRepository.save(category);

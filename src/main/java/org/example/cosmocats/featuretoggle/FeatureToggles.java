@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum FeatureToggles {
-  COSMO_CATS("cosmo-cats"),
-  KITTY_PRODUCTS("kitty-products");
+  COSMO_CATS("cosmo-kitty"),
+  KITTY_PRODUCTS("cat-products");
 
   private final String featureName;
 
