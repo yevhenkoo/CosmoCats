@@ -13,8 +13,8 @@ application:
     ratings: ${application.rating-service.base-path}/rating-service/v1/ratings
   feature:
     toggles:
-      cosmoCats: true
-      kittyProducts: false
+      cosmo-kitty: true
+      cat-products: false
 
 ---
 spring:
@@ -24,5 +24,5 @@ spring:
 application:
   feature:
     toggles:
-      cosmoCats: true
-      kittyProducts: false
+      cosmo-kitty: true
+      cat-products: false

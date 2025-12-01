@@ -3,6 +3,6 @@ package org.example.cosmocats.featuretoggle.exception;
 public class FeatureToggleNotEnabledException extends RuntimeException {
 
   public FeatureToggleNotEnabledException(String featureName) {
-    super("Feature toggle " + featureName + " is not enabled!");
+    super(String.format("Feature toggle %s is not enabled!", featureName));
   }
 }

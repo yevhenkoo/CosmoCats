@@ -16,11 +16,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo; // ЗМІНЕНО
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProductControllerIT extends AbstractIT {
 
   @Autowired private MockMvc mockMvc;
-
   @Autowired private ObjectMapper objectMapper;
 
   @BeforeEach
@@ -76,7 +76,7 @@ class ProductControllerIT extends AbstractIT {
                 .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status", is(400)))
-        .andExpect(jsonPath("$.message", containsString("Field 'name'")));
+        .andExpect(jsonPath("$.errors[*]", hasItem(containsString("Field 'name'"))));
   }
 
   @Test
@@ -92,7 +92,8 @@ class ProductControllerIT extends AbstractIT {
                 .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status", is(400)))
-        .andExpect(jsonPath("$.message", containsString("Field 'price'")));
+        // ВИПРАВЛЕНО: перевірка через поле errors
+        .andExpect(jsonPath("$.errors[*]", hasItem(containsString("Field 'price'"))));
   }
 
   @Test
@@ -108,14 +109,13 @@ class ProductControllerIT extends AbstractIT {
                 .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status", is(400)))
-        .andExpect(jsonPath("$.message", containsString("Field 'sku'")));
+        .andExpect(jsonPath("$.errors[*]", hasItem(containsString("Field 'sku'"))));
   }
 
   @Test
   @DisplayName("GET /products/{id} (Positive): Should return 200 OK and product with WireMock data")
   @SneakyThrows
   void getProductById_shouldReturn200_whenFound_withSupplierInfo() {
-
     Long id = 1L;
     String sku = "ELEC-MON-001";
 
@@ -124,7 +124,7 @@ class ProductControllerIT extends AbstractIT {
 
     stubFor(
         com.github.tomakehurst.wiremock.client.WireMock.get(
-                urlPathEqualTo("/suppliers/info/" + sku)) // ЗМІНЕНО
+                urlPathEqualTo("/suppliers/info/" + sku))
             .willReturn(
                 aResponse()
                     .withStatus(200)
