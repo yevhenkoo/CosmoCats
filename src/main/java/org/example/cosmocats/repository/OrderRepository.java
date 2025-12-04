@@ -1,12 +1,12 @@
 package org.example.cosmocats.repository;
 
-import org.example.cosmocats.domain.Order;
+import org.example.cosmocats.entity.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
-  Optional<Order> findByOrderNumber(String orderNumber);
+  Optional<OrderEntity> findByOrderNumber(String orderNumber);
 }

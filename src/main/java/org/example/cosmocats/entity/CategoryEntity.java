@@ -1,4 +1,4 @@
-package org.example.cosmocats.domain;
+package org.example.cosmocats.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(exclude = "products")
-public class Category {
+public class CategoryEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_seq")
@@ -24,5 +24,5 @@ public class Category {
   private String name;
 
   @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-  private List<Product> products = new ArrayList<>();
+  private List<ProductEntity> products = new ArrayList<>();
 }

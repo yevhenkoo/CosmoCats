@@ -2,8 +2,8 @@ package org.example.cosmocats.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.cosmocats.domain.Order;
-import org.example.cosmocats.domain.Product;
+import org.example.cosmocats.entity.OrderEntity;
+import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.repository.OrderRepository;
 import org.example.cosmocats.repository.ProductRepository;
 import org.example.cosmocats.repository.projection.ProductSalesProjection;
@@ -29,17 +29,17 @@ public class CosmoCatServiceImpl implements CosmoCatService {
 
   @Override
   @Transactional
-  public Order createOrder(List<Long> productIds) {
+  public OrderEntity createOrder(List<Long> productIds) {
     log.info("Creating order with products: {}", productIds);
 
-    List<Product> products = productRepository.findAllById(productIds);
+    List<ProductEntity> products = productRepository.findAllById(productIds);
     if (products.isEmpty()) {
       throw new IllegalArgumentException("No products found for ID list");
     }
 
-    double totalPrice = products.stream().mapToDouble(Product::getPrice).sum();
+    double totalPrice = products.stream().mapToDouble(ProductEntity::getPrice).sum();
 
-    Order order = new Order();
+    OrderEntity order = new OrderEntity();
     order.setOrderNumber(UUID.randomUUID().toString());
     order.setProducts(products);
     order.setTotalPrice(totalPrice);

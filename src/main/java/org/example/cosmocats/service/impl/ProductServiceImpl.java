@@ -3,11 +3,12 @@ package org.example.cosmocats.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.cosmocats.client.SupplierClient;
-import org.example.cosmocats.domain.Category;
-import org.example.cosmocats.domain.Product;
 import org.example.cosmocats.dto.product.ProductDetailsDto;
 import org.example.cosmocats.dto.product.ProductDetailsEntry;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
+import org.example.cosmocats.entity.CategoryEntity;
+import org.example.cosmocats.entity.ProductEntity;
+import org.example.cosmocats.web.exceptions.CosmoCatsPersistenceException;
 import org.example.cosmocats.repository.CategoryRepository;
 import org.example.cosmocats.repository.ProductRepository;
 import org.example.cosmocats.service.ProductService;
@@ -32,24 +33,30 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public ProductDetailsEntry createProduct(ProductDetailsDto productDto) {
     log.info("Creating product: {}", productDto);
+    try {
+      CategoryEntity category =
+          categoryRepository
+              .findByName(productDto.getCategory())
+              .orElseGet(
+                  () -> {
+                    CategoryEntity newCat = new CategoryEntity();
+                    newCat.setName(productDto.getCategory());
+                    return categoryRepository.save(newCat);
+                  });
 
-    Category category =
-        categoryRepository
-            .findByName(productDto.getCategory())
-            .orElseGet(
-                () -> {
-                  Category newCat = new Category();
-                  newCat.setName(productDto.getCategory());
-                  return categoryRepository.save(newCat);
-                });
+      ProductEntity product = productMapper.toProductEntity(productDto);
+      product.setCategory(category);
 
-    Product product = productMapper.toProductEntity(productDto);
-    product.setCategory(category);
+      ProductEntity savedProduct = productRepository.save(product);
+      log.debug("Product saved in DB with id: {}", savedProduct.getId());
 
-    Product savedProduct = productRepository.save(product);
-    log.debug("Product saved in DB with id: {}", savedProduct.getId());
+      return productMapper.toProductDetailsEntry(savedProduct);
 
-    return productMapper.toProductDetailsEntry(savedProduct);
+    } catch (Exception e) {
+      log.error("Error creating product: {}", productDto.getName(), e);
+      throw new CosmoCatsPersistenceException(
+          "Failed to create product: " + productDto.getName(), e);
+    }
   }
 
   @Override
@@ -64,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
   public ProductDetailsEntry getProductById(Long id) {
     log.info("Fetching product by id: {}", id);
 
-    Product product =
+    ProductEntity product =
         productRepository
             .findById(id)
             .orElseThrow(
@@ -89,46 +96,57 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public ProductDetailsEntry updateProduct(Long id, ProductDetailsDto productDto) {
     log.info("Updating product with id: {}", id);
+    try {
+      ProductEntity existingProduct =
+          productRepository
+              .findById(id)
+              .orElseThrow(
+                  () -> new ProductNotFoundException("Product with id " + id + " not found"));
 
-    Product existingProduct =
-        productRepository
-            .findById(id)
-            .orElseThrow(
-                () -> new ProductNotFoundException("Product with id " + id + " not found"));
+      existingProduct.setName(productDto.getName());
+      existingProduct.setDescription(productDto.getDescription());
+      existingProduct.setPrice(productDto.getPrice());
+      existingProduct.setSku(productDto.getSku());
+      existingProduct.setStockQuantity(productDto.getStockQuantity());
 
-    existingProduct.setName(productDto.getName());
-    existingProduct.setDescription(productDto.getDescription());
-    existingProduct.setPrice(productDto.getPrice());
-    existingProduct.setSku(productDto.getSku());
-    existingProduct.setStockQuantity(productDto.getStockQuantity());
+      if (!existingProduct.getCategory().getName().equals(productDto.getCategory())) {
+        CategoryEntity category =
+            categoryRepository
+                .findByName(productDto.getCategory())
+                .orElseGet(
+                    () -> {
+                      CategoryEntity newCat = new CategoryEntity();
+                      newCat.setName(productDto.getCategory());
+                      return categoryRepository.save(newCat);
+                    });
+        existingProduct.setCategory(category);
+      }
 
-    // Оновлюємо категорію, якщо змінилася
-    if (!existingProduct.getCategory().getName().equals(productDto.getCategory())) {
-      Category category =
-          categoryRepository
-              .findByName(productDto.getCategory())
-              .orElseGet(
-                  () -> {
-                    Category newCat = new Category();
-                    newCat.setName(productDto.getCategory());
-                    return categoryRepository.save(newCat);
-                  });
-      existingProduct.setCategory(category);
+      ProductEntity saved = productRepository.save(existingProduct);
+      return productMapper.toProductDetailsEntry(saved);
+
+    } catch (ProductNotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+
+      log.error("Error updating product with id: {}", id, e);
+      throw new CosmoCatsPersistenceException("Failed to update product with id: " + id, e);
     }
-
-    Product saved = productRepository.save(existingProduct);
-
-    return productMapper.toProductDetailsEntry(saved);
   }
 
   @Override
   @Transactional
   public void deleteProduct(Long id) {
     log.info("Deleting product with id: {}", id);
-    if (productRepository.existsById(id)) {
-      productRepository.deleteById(id);
-    } else {
-      log.warn("Product with id {} not found during delete", id);
+    try {
+      if (productRepository.existsById(id)) {
+        productRepository.deleteById(id);
+      } else {
+        log.warn("Product with id {} not found during delete", id);
+      }
+    } catch (Exception e) {
+      log.error("Error deleting product with id: {}", id, e);
+      throw new CosmoCatsPersistenceException("Failed to delete product with id: " + id, e);
     }
   }
 }

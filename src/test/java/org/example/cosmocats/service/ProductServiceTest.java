@@ -1,8 +1,8 @@
 package org.example.cosmocats.service;
 
 import org.example.cosmocats.client.SupplierClient;
-import org.example.cosmocats.domain.Category;
-import org.example.cosmocats.domain.Product;
+import org.example.cosmocats.entity.CategoryEntity;
+import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.dto.product.ProductDetailsDto;
 import org.example.cosmocats.dto.product.ProductDetailsEntry;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
@@ -52,7 +52,7 @@ class ProductServiceTest {
   @DisplayName("getAllProducts: Should return list of products")
   void testGetAllProducts() {
 
-    Product product = new Product();
+    ProductEntity product = new ProductEntity();
     product.setId(1L);
 
     ProductDetailsEntry entry = new ProductDetailsEntry();
@@ -74,7 +74,7 @@ class ProductServiceTest {
     Long id = 1L;
     String sku = "ELEC-MON-001";
 
-    Product product = new Product();
+    ProductEntity product = new ProductEntity();
     product.setId(id);
     product.setSku(sku);
 
@@ -99,13 +99,13 @@ class ProductServiceTest {
   void testCreateProduct_shouldReturnCreatedProduct() {
     ProductDetailsDto createDto = buildCreateDto();
 
-    Category category = new Category();
+    CategoryEntity category = new CategoryEntity();
     category.setName("Gadgets");
 
-    Product mappedProduct = new Product();
+    ProductEntity mappedProduct = new ProductEntity();
     mappedProduct.setName("New Product");
 
-    Product savedProduct = new Product();
+    ProductEntity savedProduct = new ProductEntity();
     savedProduct.setId(10L);
     savedProduct.setName("New Product");
 
@@ -116,7 +116,7 @@ class ProductServiceTest {
     when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(category));
 
     when(productMapper.toProductEntity(createDto)).thenReturn(mappedProduct);
-    when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+    when(productRepository.save(any(ProductEntity.class))).thenReturn(savedProduct);
     when(productMapper.toProductDetailsEntry(savedProduct)).thenReturn(expectedResult);
 
     ProductDetailsEntry result = productService.createProduct(createDto);
@@ -124,7 +124,7 @@ class ProductServiceTest {
     assertNotNull(result);
     assertEquals(10L, result.getId());
     assertEquals("New Product", result.getName());
-    verify(productRepository).save(any(Product.class));
+    verify(productRepository).save(any(ProductEntity.class));
   }
 
   @Test
@@ -134,18 +134,18 @@ class ProductServiceTest {
     ProductDetailsDto updateDto =
         buildCreateDto().toBuilder().name("Updated Name").category("Updated Category").build();
 
-    Product existingProduct = new Product();
+    ProductEntity existingProduct = new ProductEntity();
     existingProduct.setId(id);
     existingProduct.setName("Old Name");
 
-    Category oldCategory = new Category();
+    CategoryEntity oldCategory = new CategoryEntity();
     oldCategory.setName("Old Category");
     existingProduct.setCategory(oldCategory);
 
-    Category newCategory = new Category();
+    CategoryEntity newCategory = new CategoryEntity();
     newCategory.setName("Updated Category");
 
-    Product updatedProduct = new Product();
+    ProductEntity updatedProduct = new ProductEntity();
     updatedProduct.setId(id);
     updatedProduct.setName("Updated Name");
 

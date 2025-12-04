@@ -1,4 +1,4 @@
-package org.example.cosmocats.domain;
+package org.example.cosmocats.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "orders")
 @Getter
 @Setter
-public class Order {
+public class OrderEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_seq")
@@ -37,5 +37,5 @@ public class Order {
       name = "orders_products",
       joinColumns = @JoinColumn(name = "order_id"),
       inverseJoinColumns = @JoinColumn(name = "product_id"))
-  private List<Product> products = new ArrayList<>();
+  private List<ProductEntity> products = new ArrayList<>();
 }

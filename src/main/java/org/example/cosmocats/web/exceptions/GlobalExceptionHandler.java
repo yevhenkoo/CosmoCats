@@ -62,4 +62,19 @@ public class GlobalExceptionHandler {
         .contentType(MediaType.APPLICATION_PROBLEM_JSON)
         .body(problemDetail);
   }
+
+  @ExceptionHandler(CosmoCatsPersistenceException.class)
+  public ResponseEntity<Object> handlePersistenceException(CosmoCatsPersistenceException ex) {
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Database processing error");
+
+    problemDetail.setTitle("Persistence Error");
+    problemDetail.setType(URI.create("urn:problem-type:persistence-error"));
+    problemDetail.setProperty("detail", ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problemDetail);
+  }
 }

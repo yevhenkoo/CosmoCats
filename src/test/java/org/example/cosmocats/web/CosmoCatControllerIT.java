@@ -25,25 +25,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(FeatureToggleExtension.class)
 public class CosmoCatControllerIT extends AbstractIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-    @Test
-    @SneakyThrows
-    @DisabledFeatureToggle(FeatureToggles.COSMO_CATS)
-    void testDisabledFeatureToggle() {
-        mockMvc.perform(get("/api/v1/cosmocats"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.title", is("Feature Not Available")))
-                .andExpect(jsonPath("$.type", is("urn:problem-type:feature-not-available")));
-    }
+  @Test
+  @SneakyThrows
+  @DisabledFeatureToggle(FeatureToggles.COSMO_CATS)
+  void testDisabledFeatureToggle() {
+    mockMvc
+        .perform(get("/api/v1/cosmocats"))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.title", is("Feature Not Available")))
+        .andExpect(jsonPath("$.type", is("urn:problem-type:feature-not-available")));
+  }
 
-    @Test
-    @SneakyThrows
-    @EnabledFeatureToggle(FeatureToggles.COSMO_CATS)
-    void testEnabledFeatureToggle() {
-        mockMvc.perform(get("/api/v1/cosmocats"))
-                .andExpect(status().isOk());
-    }
+  @Test
+  @SneakyThrows
+  @EnabledFeatureToggle(FeatureToggles.COSMO_CATS)
+  void testEnabledFeatureToggle() {
+    mockMvc.perform(get("/api/v1/cosmocats")).andExpect(status().isOk());
+  }
 }

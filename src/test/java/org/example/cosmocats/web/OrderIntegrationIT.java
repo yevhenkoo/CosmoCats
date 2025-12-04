@@ -1,9 +1,9 @@
 package org.example.cosmocats.web;
 
 import org.example.cosmocats.AbstractIT;
-import org.example.cosmocats.domain.Category;
-import org.example.cosmocats.domain.Order;
-import org.example.cosmocats.domain.Product;
+import org.example.cosmocats.entity.CategoryEntity;
+import org.example.cosmocats.entity.OrderEntity;
+import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.repository.CategoryRepository;
 import org.example.cosmocats.repository.OrderRepository;
 import org.example.cosmocats.repository.ProductRepository;
@@ -29,30 +29,30 @@ class OrderIntegrationIT extends AbstractIT {
   @Transactional
   void shouldSaveOrderAndGetReport() {
 
-    Category electronics = new Category();
+    CategoryEntity electronics = new CategoryEntity();
     electronics.setName("Electronics");
     categoryRepository.save(electronics);
 
-    Product galaxyCommunicator = new Product();
+    ProductEntity galaxyCommunicator = new ProductEntity();
     galaxyCommunicator.setName("Galaxy Communicator 3000");
     galaxyCommunicator.setPrice(500.0);
     galaxyCommunicator.setCategory(electronics);
     productRepository.save(galaxyCommunicator);
 
-    Product starMap = new Product();
+    ProductEntity starMap = new ProductEntity();
     starMap.setName("Interstellar Map");
     starMap.setPrice(100.0);
     starMap.setCategory(electronics);
     productRepository.save(starMap);
 
-    Order order1 = new Order();
+    OrderEntity order1 = new OrderEntity();
     order1.setOrderNumber(UUID.randomUUID().toString());
     order1.setTotalPrice(600.0);
     order1.setProducts(List.of(galaxyCommunicator, starMap));
 
     orderRepository.save(order1);
 
-    Order order2 = new Order();
+    OrderEntity order2 = new OrderEntity();
     order2.setOrderNumber(UUID.randomUUID().toString());
     order2.setTotalPrice(500.0);
     order2.setProducts(List.of(galaxyCommunicator));
@@ -74,23 +74,23 @@ class OrderIntegrationIT extends AbstractIT {
   @Test
   @DisplayName("Should generate Natural ID and CreatedAt properly")
   void shouldVerifyConstraints() {
-    Category cat = new Category();
+    CategoryEntity cat = new CategoryEntity();
     cat.setName("Food");
     categoryRepository.save(cat);
 
-    Product tuna = new Product();
+    ProductEntity tuna = new ProductEntity();
     tuna.setName("Space Tuna");
     tuna.setPrice(10.0);
     tuna.setCategory(cat);
     productRepository.save(tuna);
 
-    Order order = new Order();
+    OrderEntity order = new OrderEntity();
     String naturalId = "ORD-2024-001";
     order.setOrderNumber(naturalId);
     order.setTotalPrice(10.0);
     order.setProducts(List.of(tuna));
 
-    Order savedOrder = orderRepository.save(order);
+    OrderEntity savedOrder = orderRepository.save(order);
 
     assertThat(savedOrder.getId()).isNotNull();
     assertThat(savedOrder.getCreatedAt()).isNotNull();

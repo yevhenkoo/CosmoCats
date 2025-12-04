@@ -3,8 +3,8 @@ package org.example.cosmocats.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.example.cosmocats.AbstractIT;
-import org.example.cosmocats.domain.Category;
-import org.example.cosmocats.domain.Product;
+import org.example.cosmocats.entity.CategoryEntity;
+import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.dto.product.ProductDetailsDto;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
 import org.example.cosmocats.repository.CategoryRepository;
@@ -122,19 +122,19 @@ class ProductControllerIT extends AbstractIT {
   @DisplayName("GET /products/{id} (Positive): Should return 200 OK and product with WireMock data")
   @SneakyThrows
   void getProductById_shouldReturn200_whenFound_withSupplierInfo() {
-    Category category = new Category();
+    CategoryEntity category = new CategoryEntity();
     category.setName("Electronics");
     categoryRepository.save(category);
 
     String sku = "ELEC-MON-001";
-    Product product = new Product();
+    ProductEntity product = new ProductEntity();
     product.setName("Starship Monitor");
     product.setCategory(category);
     product.setPrice(500.0);
     product.setSku(sku);
     product.setStockQuantity(5);
 
-    Product savedProduct = productRepository.save(product);
+    ProductEntity savedProduct = productRepository.save(product);
     Long realId = savedProduct.getId();
 
     SupplierInfoDto supplierInfo = new SupplierInfoDto("Mocked Supplier", "Mock-Country", 3);
@@ -168,15 +168,15 @@ class ProductControllerIT extends AbstractIT {
   @DisplayName("DELETE /products/{id}: Should return 204 No Content")
   @SneakyThrows
   void deleteProduct_shouldReturn204() {
-    Category category = new Category();
+    CategoryEntity category = new CategoryEntity();
     category.setName("To Delete");
     categoryRepository.save(category);
 
-    Product product = new Product();
+    ProductEntity product = new ProductEntity();
     product.setName("Delete Me");
     product.setPrice(10.0);
     product.setCategory(category);
-    Product saved = productRepository.save(product);
+    ProductEntity saved = productRepository.save(product);
 
     mockMvc
         .perform(delete("/api/v1/products/{id}", saved.getId()))
@@ -189,17 +189,17 @@ class ProductControllerIT extends AbstractIT {
   @DisplayName("GET /products: Should return 200 OK and list of products")
   @SneakyThrows
   void getAllProducts_shouldReturn200_andList() {
-    Category cat = new Category();
+    CategoryEntity cat = new CategoryEntity();
     cat.setName("List Cat");
     categoryRepository.save(cat);
 
-    Product p1 = new Product();
+    ProductEntity p1 = new ProductEntity();
     p1.setName("Starship Monitor");
     p1.setPrice(100.0);
     p1.setCategory(cat);
     productRepository.save(p1);
 
-    Product p2 = new Product();
+    ProductEntity p2 = new ProductEntity();
     p2.setName("Galaxy Phone");
     p2.setPrice(200.0);
     p2.setCategory(cat);
@@ -218,15 +218,15 @@ class ProductControllerIT extends AbstractIT {
   @DisplayName("PUT /products/{id}: Should return 200 OK and updated product")
   @SneakyThrows
   void updateProduct_shouldReturn200_whenValid() {
-    Category category = new Category();
+    CategoryEntity category = new CategoryEntity();
     category.setName("Original Category");
     categoryRepository.save(category);
 
-    Product product = new Product();
+    ProductEntity product = new ProductEntity();
     product.setName("Original Name");
     product.setPrice(50.0);
     product.setCategory(category);
-    Product saved = productRepository.save(product);
+    ProductEntity saved = productRepository.save(product);
 
     ProductDetailsDto updateDto =
         buildValidDto().toBuilder()

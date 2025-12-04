@@ -1,4 +1,4 @@
-package org.example.cosmocats.domain;
+package org.example.cosmocats.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,7 +17,7 @@ import lombok.ToString;
           name = "uk_product_name_category",
           columnNames = {"name", "category_id"})
     })
-public class Product {
+public class ProductEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_seq")
@@ -38,5 +38,5 @@ public class Product {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id", nullable = false)
-  private Category category;
+  private CategoryEntity category;
 }

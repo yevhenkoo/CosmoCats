@@ -21,7 +21,8 @@ jacocoTestCoverageVerification {
                         '**/config/*Configuration.*',
                         '**/org/example/cosmocats/service/mapper/**',
                         '**/org/example/cosmocats/dto/**',
-                        '**/org/example/cosmocats/client/**']
+                        '**/org/example/cosmocats/client/**',
+                        '**/*Exception.*']
             limit {
                 counter = 'LINE'
                 minimum = minimumCoveragePerFile

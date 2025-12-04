@@ -1,7 +1,7 @@
 package org.example.cosmocats.service;
 
-import org.example.cosmocats.domain.Order;
-import org.example.cosmocats.domain.Product;
+import org.example.cosmocats.entity.OrderEntity;
+import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.repository.OrderRepository;
 import org.example.cosmocats.repository.ProductRepository;
 import org.example.cosmocats.repository.projection.ProductSalesProjection;
@@ -42,11 +42,11 @@ class CosmoCatServiceTest {
   @DisplayName("createOrder: Should calculate total price and save order")
   void createOrder_ShouldSaveOrder() {
 
-    Product p1 = new Product();
+    ProductEntity p1 = new ProductEntity();
     p1.setId(1L);
     p1.setPrice(100.0);
 
-    Product p2 = new Product();
+    ProductEntity p2 = new ProductEntity();
     p2.setId(2L);
     p2.setPrice(50.0);
 
@@ -54,15 +54,15 @@ class CosmoCatServiceTest {
 
     when(productRepository.findAllById(productIds)).thenReturn(List.of(p1, p2));
 
-    when(orderRepository.save(any(Order.class)))
+    when(orderRepository.save(any(OrderEntity.class)))
         .thenAnswer(
             invocation -> {
-              Order order = invocation.getArgument(0);
+              OrderEntity order = invocation.getArgument(0);
               order.setId(123L);
               return order;
             });
 
-    Order createdOrder = cosmoCatService.createOrder(productIds);
+    OrderEntity createdOrder = cosmoCatService.createOrder(productIds);
 
     assertThat(createdOrder).isNotNull();
     assertThat(createdOrder.getId()).isEqualTo(123L);
@@ -70,7 +70,7 @@ class CosmoCatServiceTest {
     assertThat(createdOrder.getProducts()).hasSize(2);
     assertThat(createdOrder.getOrderNumber()).isNotNull();
 
-    verify(orderRepository).save(any(Order.class));
+    verify(orderRepository).save(any(OrderEntity.class));
   }
 
   @Test
