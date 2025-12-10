@@ -3,10 +3,10 @@ package org.example.cosmocats.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.example.cosmocats.AbstractIT;
-import org.example.cosmocats.entity.CategoryEntity;
-import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.dto.product.ProductDetailsDto;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
+import org.example.cosmocats.entity.CategoryEntity;
+import org.example.cosmocats.entity.ProductEntity;
 import org.example.cosmocats.repository.CategoryRepository;
 import org.example.cosmocats.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser; // ⚠️
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -58,7 +59,26 @@ class ProductControllerIT extends AbstractIT {
   }
 
   @Test
+  @DisplayName("Security: Should return 401 Unauthorized when no auth provided")
+  @SneakyThrows
+  void shouldReturn401_whenNoAuth() {
+    mockMvc.perform(get("/api/v1/products")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @DisplayName("Security: Should return 200 OK when valid API Key provided (Variant 1)")
+  @SneakyThrows
+  void shouldReturn200_whenApiKeyIsValid() {
+    String validKey = "cosmo-secret-key-123";
+
+    mockMvc
+        .perform(get("/api/v1/products").header("X-Api-Key", validKey))
+        .andExpect(status().isOk());
+  }
+
+  @Test
   @DisplayName("POST /products (Positive): Should return 201 Created when data is valid")
+  @WithMockUser(roles = "ADMIN")
   @SneakyThrows
   void createProduct_shouldReturn201_whenValid() {
     mockMvc
@@ -72,6 +92,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("POST /products (Negative): Should return 400 Bad Request when name is blank")
+  @WithMockUser(roles = "ADMIN")
   @SneakyThrows
   void createProduct_shouldReturn400_whenNameIsBlank() {
     ProductDetailsDto invalidDto = buildValidDto().toBuilder().name("").build();
@@ -88,6 +109,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("POST /products (Negative): Should return 400 Bad Request when price is negative")
+  @WithMockUser(roles = "ADMIN")
   @SneakyThrows
   void createProduct_shouldReturn400_whenPriceIsNegative() {
     ProductDetailsDto invalidDto = buildValidDto().toBuilder().price(-10.0).build();
@@ -104,6 +126,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("POST /products (Negative): Should return 400 Bad Request when SKU is invalid")
+  @WithMockUser(roles = "ADMIN")
   @SneakyThrows
   void createProduct_shouldReturn400_whenSkuIsInvalid() {
     ProductDetailsDto invalidDto = buildValidDto().toBuilder().sku("invalid sku pattern").build();
@@ -120,6 +143,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("GET /products/{id} (Positive): Should return 200 OK and product with WireMock data")
+  @WithMockUser(roles = "USER")
   @SneakyThrows
   void getProductById_shouldReturn200_whenFound_withSupplierInfo() {
     CategoryEntity category = new CategoryEntity();
@@ -159,6 +183,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("GET /products/{id} (Negative): Should return 404 when product is not found")
+  @WithMockUser(roles = "USER")
   @SneakyThrows
   void getProductById_shouldReturn404_whenNotFound() {
     mockMvc.perform(get("/api/v1/products/999")).andExpect(status().isNotFound());
@@ -166,6 +191,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("DELETE /products/{id}: Should return 204 No Content")
+  @WithMockUser(roles = "ADMIN")
   @SneakyThrows
   void deleteProduct_shouldReturn204() {
     CategoryEntity category = new CategoryEntity();
@@ -187,6 +213,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("GET /products: Should return 200 OK and list of products")
+  @WithMockUser(roles = "USER")
   @SneakyThrows
   void getAllProducts_shouldReturn200_andList() {
     CategoryEntity cat = new CategoryEntity();
@@ -216,6 +243,7 @@ class ProductControllerIT extends AbstractIT {
 
   @Test
   @DisplayName("PUT /products/{id}: Should return 200 OK and updated product")
+  @WithMockUser(roles = "ADMIN")
   @SneakyThrows
   void updateProduct_shouldReturn200_whenValid() {
     CategoryEntity category = new CategoryEntity();
