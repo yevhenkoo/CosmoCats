@@ -18,7 +18,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
-@ActiveProfiles("local") // Щоб підтягнути application.yml
+@ActiveProfiles("local")
 public abstract class AbstractIT {
 
   @Container @ServiceConnection
@@ -33,18 +33,15 @@ public abstract class AbstractIT {
 
   @DynamicPropertySource
   static void configureDynamicProperties(DynamicPropertyRegistry registry) {
-    // 1. OAUTH2 / JWT (динамічний порт)
+
     registry.add(
         "spring.security.oauth2.resourceserver.jwt.jwk-set-uri",
         () -> wireMockServer.baseUrl() + "/.well-known/jwks.json");
 
-    // Додаємо алгоритм явно, щоб уникнути помилок
     registry.add("spring.security.oauth2.resourceserver.jwt.jws-algorithms", () -> "RS256");
 
-    // 2. PAYMENT SERVICE (динамічний порт) - ВИПРАВЛЕНО (додано лямбду)
     registry.add("application.payment-service.base-path", () -> wireMockServer.baseUrl());
 
-    // 3. API KEY (Гарантуємо наявність значень для тестів)
     registry.add("application.security.api-key", () -> "cosmo-secret-key-123");
     registry.add("application.security.api-key-header", () -> "X-Api-Key");
   }

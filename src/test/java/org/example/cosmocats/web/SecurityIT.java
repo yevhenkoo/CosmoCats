@@ -31,8 +31,6 @@ class SecurityIT extends AbstractIT {
 
   @BeforeEach
   void setUp() {
-    // Створюємо продукт, щоб GET запит повертав дані (не пустий список)
-    // Це аналог вашого categoryRepository.save(...)
     try {
       ProductDetailsDto product =
           ProductDetailsDto.builder()
@@ -45,7 +43,6 @@ class SecurityIT extends AbstractIT {
               .build();
       productService.createProduct(product);
     } catch (Exception e) {
-      // Ігноруємо, якщо вже існує (або використовуємо @DirtiesContext)
     }
   }
 
@@ -72,7 +69,6 @@ class SecurityIT extends AbstractIT {
     mockMvc
         .perform(get("/api/v1/products").header(apiKeyHeader, "invalid-key-meow"))
         .andExpect(status().isUnauthorized())
-        // Перевірка повідомлення з вашого фільтра
         .andExpect(jsonPath("$.message").value("Invalid API Key"));
   }
 
