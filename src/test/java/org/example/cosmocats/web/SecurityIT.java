@@ -64,12 +64,12 @@ class SecurityIT extends AbstractIT {
   }
 
   @Test
-  @DisplayName("Should return 401 for invalid API Key")
+  @DisplayName("Should return 401 for invalid API key value")
   void shouldRejectInvalidApiKey() throws Exception {
     mockMvc
-        .perform(get("/api/v1/products").header(apiKeyHeader, "invalid-key-meow"))
+        .perform(get("/api/v1/products").header(apiKeyHeader, "invalid"))
         .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.message").value("Invalid API Key"));
+        .andExpect(jsonPath("$.message").value("Unauthorized: Invalid API Key provided"));
   }
 
   @Test
