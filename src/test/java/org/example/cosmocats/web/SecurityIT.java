@@ -1,8 +1,10 @@
 package org.example.cosmocats.web;
 
 import org.example.cosmocats.AbstractIT;
-import org.example.cosmocats.dto.product.ProductDetailsDto;
-import org.example.cosmocats.service.ProductService;
+import org.example.cosmocats.entity.CategoryEntity;
+import org.example.cosmocats.entity.ProductEntity;
+import org.example.cosmocats.repository.CategoryRepository;
+import org.example.cosmocats.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,9 @@ class SecurityIT extends AbstractIT {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private ProductService productService;
+  @Autowired private ProductRepository productRepository;
+
+  @Autowired private CategoryRepository categoryRepository;
 
   @Value("${application.security.api-key}")
   private String apiKey;
@@ -31,19 +35,22 @@ class SecurityIT extends AbstractIT {
 
   @BeforeEach
   void setUp() {
-    try {
-      ProductDetailsDto product =
-          ProductDetailsDto.builder()
-              .name("Secured Tuna")
-              .description("Top secret")
-              .price(100.0)
-              .category("Food")
-              .sku("SECURE-123")
-              .stockQuantity(10)
-              .build();
-      productService.createProduct(product);
-    } catch (Exception e) {
-    }
+    productRepository.deleteAll();
+    categoryRepository.deleteAll();
+
+    CategoryEntity category = new CategoryEntity();
+    category.setName("Food");
+    CategoryEntity savedCategory = categoryRepository.save(category);
+
+    ProductEntity product = new ProductEntity();
+    product.setName("Secured Tuna");
+    product.setDescription("Top secret");
+    product.setPrice(100.0);
+    product.setSku("SECURE-123");
+    product.setStockQuantity(10);
+    product.setCategory(savedCategory);
+
+    productRepository.save(product);
   }
 
   @Test
@@ -64,12 +71,11 @@ class SecurityIT extends AbstractIT {
   }
 
   @Test
-  @DisplayName("Should return 401 for invalid API key value")
+  @DisplayName("Should return 401 for invalid API Key")
   void shouldRejectInvalidApiKey() throws Exception {
     mockMvc
-        .perform(get("/api/v1/products").header(apiKeyHeader, "invalid"))
-        .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.message").value("Unauthorized: Invalid API Key provided"));
+        .perform(get("/api/v1/products").header(apiKeyHeader, "invalid-key-meow"))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test

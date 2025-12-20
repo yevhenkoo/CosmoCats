@@ -40,10 +40,10 @@ public abstract class AbstractIT {
 
     registry.add("spring.security.oauth2.resourceserver.jwt.jws-algorithms", () -> "RS256");
 
-    registry.add("application.payment-service.base-path", () -> wireMockServer.baseUrl());
-
     registry.add("application.security.api-key", () -> "cosmo-secret-key-123");
     registry.add("application.security.api-key-header", () -> "X-Api-Key");
+
+    registry.add("application.payment-service.base-path", () -> wireMockServer.baseUrl());
   }
 
   @BeforeAll
