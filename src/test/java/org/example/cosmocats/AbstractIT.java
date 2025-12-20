@@ -1,36 +1,73 @@
 package org.example.cosmocats;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @Testcontainers
+@ActiveProfiles("local")
 public abstract class AbstractIT {
 
-  @RegisterExtension
+  @Container @ServiceConnection
+  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+
+  @org.junit.jupiter.api.extension.RegisterExtension
   protected static WireMockExtension wireMockServer =
       WireMockExtension.newInstance()
           .options(wireMockConfig().dynamicPort())
           .configureStaticDsl(true)
           .build();
 
-  @Container @ServiceConnection
-  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
   @DynamicPropertySource
-  static void dynamicProperties(DynamicPropertyRegistry registry) {
+  static void configureDynamicProperties(DynamicPropertyRegistry registry) {
 
-    registry.add("application.payment-service.base-path", wireMockServer::baseUrl);
-    WireMock.configureFor(wireMockServer.getPort());
+    registry.add(
+        "spring.security.oauth2.resourceserver.jwt.jwk-set-uri",
+        () -> wireMockServer.baseUrl() + "/.well-known/jwks.json");
+
+    registry.add("spring.security.oauth2.resourceserver.jwt.jws-algorithms", () -> "RS256");
+
+    registry.add("application.security.api-key", () -> "cosmo-secret-key-123");
+    registry.add("application.security.api-key-header", () -> "X-Api-Key");
+
+    registry.add("application.payment-service.base-path", () -> wireMockServer.baseUrl());
+  }
+
+  @BeforeAll
+  static void setupJwksMock() {
+    stubFor(
+        get(urlPathEqualTo("/.well-known/jwks.json"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        """
+                {
+                  "keys": [
+                    {
+                      "kty": "RSA",
+                      "e": "AQAB",
+                      "use": "sig",
+                      "kid": "test-key-id",
+                      "alg": "RS256",
+                      "n": "v1..."
+                    }
+                  ]
+                }
+                """)));
   }
 }

@@ -11,6 +11,7 @@ import org.example.cosmocats.repository.projection.ProductSalesProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@WithMockUser(roles = "ADMIN")
 class OrderIntegrationIT extends AbstractIT {
 
   @Autowired private CategoryRepository categoryRepository;
@@ -28,7 +30,6 @@ class OrderIntegrationIT extends AbstractIT {
   @DisplayName("Should save order and retrieve sales report correctly")
   @Transactional
   void shouldSaveOrderAndGetReport() {
-
     CategoryEntity electronics = new CategoryEntity();
     electronics.setName("Electronics");
     categoryRepository.save(electronics);
@@ -74,6 +75,7 @@ class OrderIntegrationIT extends AbstractIT {
   @Test
   @DisplayName("Should generate Natural ID and CreatedAt properly")
   void shouldVerifyConstraints() {
+
     CategoryEntity cat = new CategoryEntity();
     cat.setName("Food");
     categoryRepository.save(cat);

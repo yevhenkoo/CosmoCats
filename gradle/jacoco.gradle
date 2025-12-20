@@ -19,6 +19,7 @@ jacocoTestCoverageVerification {
             element = 'SOURCEFILE'
             excludes = ['**/CosmoCatsApplication.*',
                         '**/config/*Configuration.*',
+                        '**/config/security/*Config.*',
                         '**/org/example/cosmocats/service/mapper/**',
                         '**/org/example/cosmocats/dto/**',
                         '**/org/example/cosmocats/client/**',

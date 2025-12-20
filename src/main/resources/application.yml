@@ -3,8 +3,17 @@ spring:
     active: local
   application:
     name: CosmoCats
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8089/.well-known/jwks.json
+
 
 application:
+  security:
+    api-key-header: "X-Api-Key"
+    api-key: "cosmo-secret-key-123"
   supplier:
     service:
       url: http://localhost:8089
@@ -17,12 +26,8 @@ application:
       cat-products: false
 
 ---
+
 spring:
   config:
     activate:
-      on-profile: dev
-application:
-  feature:
-    toggles:
-      cosmo-kitty: true
-      cat-products: false
+      on-profile: no-auth

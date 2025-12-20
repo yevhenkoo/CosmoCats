@@ -8,12 +8,13 @@ import org.example.cosmocats.dto.product.ProductDetailsEntry;
 import org.example.cosmocats.dto.product.SupplierInfoDto;
 import org.example.cosmocats.entity.CategoryEntity;
 import org.example.cosmocats.entity.ProductEntity;
-import org.example.cosmocats.web.exceptions.CosmoCatsPersistenceException;
 import org.example.cosmocats.repository.CategoryRepository;
 import org.example.cosmocats.repository.ProductRepository;
 import org.example.cosmocats.service.ProductService;
 import org.example.cosmocats.service.mapper.ProductMapper;
+import org.example.cosmocats.web.exceptions.CosmoCatsPersistenceException;
 import org.example.cosmocats.web.exceptions.ProductNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional
+  @PreAuthorize("hasAnyRole('ADMIN', 'API')")
   public ProductDetailsEntry createProduct(ProductDetailsDto productDto) {
     log.info("Creating product: {}", productDto);
     try {
@@ -61,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
+  @PreAuthorize("hasAnyRole('ADMIN', 'API', 'USER')")
   public List<ProductDetailsEntry> getAllProducts() {
     log.info("Fetching all products from DB");
     return productRepository.findAll().stream().map(productMapper::toProductDetailsEntry).toList();
@@ -68,6 +71,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
+  @PreAuthorize("hasAnyRole('ADMIN', 'API', 'USER')")
   public ProductDetailsEntry getProductById(Long id) {
     log.info("Fetching product by id: {}", id);
 
@@ -94,6 +98,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional
+  @PreAuthorize("hasAnyRole('ADMIN', 'API')")
   public ProductDetailsEntry updateProduct(Long id, ProductDetailsDto productDto) {
     log.info("Updating product with id: {}", id);
     try {
@@ -136,6 +141,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional
+  @PreAuthorize("hasAnyRole('ADMIN', 'API')")
   public void deleteProduct(Long id) {
     log.info("Deleting product with id: {}", id);
     try {
